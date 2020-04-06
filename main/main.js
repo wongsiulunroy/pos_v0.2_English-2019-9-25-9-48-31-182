@@ -1,82 +1,94 @@
 'use strict';
 
 function printReceipt(inputs) {
- getName(inputs)
- getQuantity(inputs)
- let decodeditem = decodeReceipt(inputs)
- let receipt = calReceipt(decodeditem)
- combineReceipt(receipt)
+	let decodeditem = decodeReceipt(inputs);
+ 	let receipt = calReceipt(calItemPrice(getQuantity(getName(inputs))));
+ 	console.log(receipt);
 }
 
+function decodeReceipt(itemBarcode) {
+	let decodeditem = [];
+	let matchedItems = getName(itemBarcode);
+	let countedItem = getQuantity(matchedItems);
+	let singleItemPrice = calItemPrice(countedItem);
+	return decodeditem;
+}
 
-
-function getName(inputs) {
+function getName(itemBarcode) {
 	let itemResult = [] 
 	itemResult= loadAllItems();
 	//console.log(itemResult);
 	let itemName = [];
-
-	itemResult.forEach(function(i) { itemName[i] = (itemName[i]||0) + 1;});
-	//console.log(quantity);
-	
-	//for (let x = 0; x<)
-	/*for (let i = 0;i<itemResult.length; i++){
-
-		itemName.push(itemResult[i].name);
-
-		//if (inputs.filter(element=>itemResult[i].barcode.includes(element))){
-			//itemName.push(itemResult[i].name);
-		//}
-		
-	}*/
-	console.log(itemName);
-
-
+	for (let loop = 0 ; loop < itemResult.length ; loop ++) {
+        var matcheditem = itemBarcode.filter(element => itemResult[loop].barcode.includes(element));
+        itemName.push(matcheditem);
+    }
+    return itemName;
+	//console.log(itemName);
 }
 
-function getQuantity(inputs) {
-	let quantity = [];
-	inputs.forEach(function(i) { quantity[i] = (quantity[i]||0) + 1;});
-	console.log(quantity);
-	return quantity;
+
+function getQuantity(matchedItems) {
+	let itemQuantity = loadAllItems();
+    itemQuantity= itemQuantity.map(function(o){o.quantity = 0; return o;});
+
+    for (let loop = 0 ; loop < matchedItems.length ; loop ++) {
+        var quantity = matchedItems[loop].length;
+        itemQuantity[loop].quantity = quantity;
+    }
+    return itemQuantity ; //array
 }
 
-function calItemPrice(input) {
-	let itemResult = [] 
-	itemResult= loadAllItems();
-	let itemPrice=[];
-
-
-	return itemPrice;
+function calItemPrice(countedItem) {
+    var itemPrice = countedItem;
+    itemPrice= itemPrice.map(function(o){o.singlePrice = 0; return o;});
+    for (let loop = 0 ; loop < countedItem.length ; loop ++) {
+        var singlePrice = countedItem[loop].price * countedItem[loop].quantity;
+        itemPrice[loop].singlePrice = singlePrice;
+    }
+    return itemPrice; //array
 }
 
-function decodeReceipt(inputs) {
-	let decodeditem = [];
-	let itemName = getName(inputs)
-	let quantity = getQuantity(inputs)
-	let itemPrice = calItemPrice(inputs)
 
-	return decodeditem;
+function calReceipt(itemPrice) {
+    let totalPrice = calTotal(itemPrice);
+    return combineReceipt(totalPrice, itemPrice);
 }
 
-function calReceipt(decodeditem) {
-	let receipt = [];
-	return receipt;
+
+function calTotal(itemPrice) {
+	let totalPrice = 0;
+    for (let loop = 0 ; loop < itemPrice.length ; loop ++){
+        totalPrice = totalPrice + parseFloat(itemPrice[loop].price) * parseInt(itemPrice[loop].quantity);
+    }
+    return totalPrice;
 }
 
-function calSubTotal(itemPrice, quantity) {
-	let subTotal = [];
-	return subTotal;
-}
+function combineReceipt(totalPrice,itemPrice ) {
+	let combinedReceipt ='***<store earning no money>Receipt *** \n';
+	for (let loop = 0 ; loop < itemPrice.length ; loop ++){
+            if (itemPrice[loop].quantity != 0){
+            combinedReceipt = combinedReceipt +  "Name:"+ itemPrice[loop].name+"，Quantity:"+ itemPrice[loop].quantity+" "+
+            itemPrice[loop].unit;
 
-function calTotal(subTotal) {
-	let TotalPrice = 0;
-	return TotalPrice;
-}
+            if(itemPrice[loop].quantity > 1){
+                    combinedReceipt = combinedReceipt + "s,Unit:"+parseFloat(itemPrice[loop].price).toFixed(2)+" (yuan),Subtotal:"+
+                    parseFloat(itemPrice[loop].singlePrice).toFixed(2)+" (yuan)";
+            }
 
-function combineReceipt(receipt) {
-	let combinedReceipt ="";
-	return combinedReceipt;
+            if(itemPrice[loop].quantity == 1){
+            combinedReceipt = combinedReceipt + ",Unit:"+parseFloat(itemPrice[loop].price).toFixed(2)+" (yuan),Subtotal:"+
+            parseFloat(itemPrice[loop].singlePrice).toFixed(2)+" (yuan)";
+            }
+
+                if(loop != itemPrice.length - 1){
+                    combinedReceipt = combinedReceipt + "\n";
+                }
+            }
+        }
+    return ("***<store earning no money>Receipt *** " + "\n" + combinedReceipt + "----------------------"+"\n"+
+            "total:"+ parseFloat(totalPrice).toFixed(2) +" (yuan)"+"\n"+"**********************");
+
 }
 
 
