@@ -6,21 +6,21 @@ function printReceipt(inputs) {
  	console.log(receipt);
 }
 
-function decodeReceipt(itemBarcode) {
+function decodeReceipt(inputs) {
 	let decodeditem = [];
-	let matchedItems = getName(itemBarcode);
-	let countedItem = getQuantity(matchedItems);
-	let singleItemPrice = calItemPrice(countedItem);
+	let itemName = getName(inputs);
+	let itemQuantity = getQuantity(itemName);
+	let itemPrice = calItemPrice(itemQuantity);
 	return decodeditem;
 }
 
-function getName(itemBarcode) {
+function getName(inputs) {
 	let itemResult = [] 
 	itemResult= loadAllItems();
 	//console.log(itemResult);
 	let itemName = [];
 	for (let loop = 0 ; loop < itemResult.length ; loop ++) {
-        var matcheditem = itemBarcode.filter(element => itemResult[loop].barcode.includes(element));
+        var matcheditem = inputs.filter(element => itemResult[loop].barcode.includes(element));
         itemName.push(matcheditem);
     }
     return itemName;
@@ -28,22 +28,22 @@ function getName(itemBarcode) {
 }
 
 
-function getQuantity(matchedItems) {
+function getQuantity(itemName) {
 	let itemQuantity = loadAllItems();
     itemQuantity= itemQuantity.map(function(o){o.quantity = 0; return o;});
 
-    for (let loop = 0 ; loop < matchedItems.length ; loop ++) {
-        var quantity = matchedItems[loop].length;
+    for (let loop = 0 ; loop < itemName.length ; loop ++) {
+        var quantity = itemName[loop].length;
         itemQuantity[loop].quantity = quantity;
     }
     return itemQuantity ; //array
 }
 
-function calItemPrice(countedItem) {
-    var itemPrice = countedItem;
+function calItemPrice(itemQuantity) {
+    var itemPrice = itemQuantity;
     itemPrice= itemPrice.map(function(o){o.singlePrice = 0; return o;});
-    for (let loop = 0 ; loop < countedItem.length ; loop ++) {
-        var singlePrice = countedItem[loop].price * countedItem[loop].quantity;
+    for (let loop = 0 ; loop < itemQuantity.length ; loop ++) {
+        var singlePrice = itemQuantity[loop].price * itemQuantity[loop].quantity;
         itemPrice[loop].singlePrice = singlePrice;
     }
     return itemPrice; //array
